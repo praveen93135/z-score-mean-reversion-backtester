@@ -55,7 +55,7 @@ With `slope-lookback = 7`, slope-mode exit happens if:
 last 7 trading days gained at least 3%, or
 both 7-day blocks in the last 14 trading days gained at least 2%, or
 all three 7-day blocks in the last 21 trading days gained at least 1%.
-or the last 7 trading days lost at least 3% when using `profit_stop`.
+or the last 7 trading days lost at least 5% when using `profit_stop`.
 ```
 
 Slope exit modes:
@@ -63,7 +63,7 @@ Slope exit modes:
 ```text
 neg         -> exit when slope turns negative
 profit      -> exit into strength using the positive-slope profit rules
-profit_stop -> profit rules plus a -3% 7-day negative-slope stop
+profit_stop -> profit rules plus a -5% 7-day negative-slope stop
 ```
 
 The program prints a metrics table and writes daily strategy details to:

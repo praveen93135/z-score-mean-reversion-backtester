@@ -589,7 +589,7 @@ Exit requires:
 last 7 trading days gained at least 3%
 or both 7-day blocks in the last 14 trading days gained at least 2%
 or all three 7-day blocks in the last 21 trading days gained at least 1%
-or, in `profit_stop` mode, the last 7 trading days lost at least 3%
+or, in `profit_stop` mode, the last 7 trading days lost at least 5%
 ```
 
 This exits into strength instead of waiting for weakness. The idea is to take profit after a rebound has happened, even if the rebound was gradual:
@@ -605,5 +605,5 @@ The supported slope exit modes are:
 ```text
 neg         -> exit when slope turns negative
 profit      -> exit into strength using only the positive-slope profit rules
-profit_stop -> profit rules plus a -3% 7-day negative-slope stop
+profit_stop -> profit rules plus a -5% 7-day negative-slope stop
 ```

@@ -60,7 +60,7 @@ bool hasNegativeSlopeStop(const PriceSeries& prices, int index, int slopeLookbac
         return false;
     }
 
-    return periodReturn(prices, index - slopeLookback, index) <= -0.03;
+    return periodReturn(prices, index - slopeLookback, index) <= -0.05;
 }
 
 bool shouldExitSlopeMode(const PriceSeries& prices, int index, int slopeLookback, SlopeExitMode mode) {
