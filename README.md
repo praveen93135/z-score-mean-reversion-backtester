@@ -4,10 +4,45 @@ This project tests a z-score based mean-reversion strategy on Indian equities an
 
 ## Strategy
 
-- Compute a 20-day moving average and rolling standard deviation.
+This branch tests the positive-profit exit strategy with an extra `-5%` slope stop.
+
+- Compute a rolling moving average and rolling standard deviation.
 - Compute z-score = `(price - moving average) / standard deviation`.
-- Enter a long position when z-score `< -2`.
-- Exit when z-score `> 0`.
+- Enter a long position when price is below the recent average and short-term slope has turned positive.
+- Exit into strength when the rebound is strong enough.
+- Also exit if the last 7 trading days lost at least 5% and price is below its 60-day moving average.
+
+Preferred configuration on this branch:
+
+```text
+lookback = 60
+entry z-score = -1.0
+slope lookback = 7
+slope exit mode = profit_stop
+transaction cost = 0.1%
+```
+
+With `slope-lookback = 7`, the positive-profit exit triggers if:
+
+```text
+last 7 trading days gained at least 3%, or
+both 7-day blocks in the last 14 trading days gained at least 2%, or
+all three 7-day blocks in the last 21 trading days gained at least 1%.
+```
+
+The stop exit triggers if:
+
+```text
+last 7 trading days lost at least 5%
+and price is below its 60-day moving average.
+```
+
+The original simple strategy is still available by setting `slope-lookback = 0`:
+
+```text
+Enter when z-score < entry-z.
+Exit when z-score > exit-z.
+```
 
 ## Backtesting Assumptions
 
@@ -29,6 +64,12 @@ cmake --build build
 ./build/backtester data/sample_prices.csv
 ```
 
+Run this branch's preferred stop strategy:
+
+```bash
+./build/backtester data/RELIANCE.csv 60 -1.0 0 0.001 7 profit_stop
+```
+
 You can also override strategy parameters:
 
 ```bash
@@ -41,21 +82,12 @@ Example:
 ./build/backtester data/RELIANCE.csv 60 -2 0 0.001 0
 ```
 
-Set `slope-lookback` to a positive number to use slope confirmation.
-For entry, the slope must be positive.
-For exit, the strategy sells into strength if recent positive slope is strong enough.
+That example runs the original z-score-only baseline because `slope-lookback = 0`.
+
+Set `slope-lookback` to a positive number to use slope confirmation:
 
 ```bash
 ./build/backtester data/RELIANCE.csv 60 -1.0 0 0.001 7 profit_stop
-```
-
-With `slope-lookback = 7`, slope-mode exit happens if:
-
-```text
-last 7 trading days gained at least 3%, or
-both 7-day blocks in the last 14 trading days gained at least 2%, or
-all three 7-day blocks in the last 21 trading days gained at least 1%.
-or the last 7 trading days lost at least 5% and price is below its 60-day moving average when using `profit_stop`.
 ```
 
 Slope exit modes:
