@@ -55,6 +55,29 @@ bool hasPositiveSlopeExit(const PriceSeries& prices, int index, int slopeLookbac
     return oneStrongBlock || twoGoodBlocks || threeSmallBlocks;
 }
 
+bool hasNegativeSlopeStop(const PriceSeries& prices, int index, int slopeLookback) {
+    if (slopeLookback <= 0 || index < slopeLookback) {
+        return false;
+    }
+
+    return periodReturn(prices, index - slopeLookback, index) <= -0.03;
+}
+
+bool shouldExitSlopeMode(const PriceSeries& prices, int index, int slopeLookback, SlopeExitMode mode) {
+    const double slope = priceSlope(prices, index, slopeLookback);
+
+    if (mode == SlopeExitMode::NegativeSlope) {
+        return slope < 0.0;
+    }
+
+    const bool profitExit = hasPositiveSlopeExit(prices, index, slopeLookback);
+    if (mode == SlopeExitMode::PositiveProfit) {
+        return profitExit;
+    }
+
+    return profitExit || hasNegativeSlopeStop(prices, index, slopeLookback);
+}
+
 } // namespace
 
 StrategySignals generateSignals(const PriceSeries& prices, const StrategyConfig& config) {
@@ -81,7 +104,10 @@ StrategySignals generateSignals(const PriceSeries& prices, const StrategyConfig&
 
             if (!inPosition && signals.zScores[i] < config.entryZScore && slope > 0.0) {
                 inPosition = true;
-            } else if (inPosition && hasPositiveSlopeExit(prices, i, config.slopeLookback)) {
+            } else if (
+                inPosition
+                && shouldExitSlopeMode(prices, i, config.slopeLookback, config.slopeExitMode)
+            ) {
                 inPosition = false;
             }
         } else {

@@ -32,13 +32,13 @@ cmake --build build
 You can also override strategy parameters:
 
 ```bash
-./build/backtester <csv-file> <lookback> <entry-z> <exit-z> <transaction-cost> <slope-lookback>
+./build/backtester <csv-file> <lookback> <entry-z> <exit-z> <transaction-cost> <slope-lookback> <slope-exit-mode>
 ```
 
 Example:
 
 ```bash
-./build/backtester data/RELIANCE.csv 60 -2 0 0.001
+./build/backtester data/RELIANCE.csv 60 -2 0 0.001 0
 ```
 
 Set `slope-lookback` to a positive number to use slope confirmation.
@@ -46,7 +46,7 @@ For entry, the slope must be positive.
 For exit, the strategy sells into strength if recent positive slope is strong enough.
 
 ```bash
-./build/backtester data/RELIANCE.csv 20 -1.0 0 0.001 7
+./build/backtester data/RELIANCE.csv 60 -1.0 0 0.001 7 profit_stop
 ```
 
 With `slope-lookback = 7`, slope-mode exit happens if:
@@ -55,6 +55,15 @@ With `slope-lookback = 7`, slope-mode exit happens if:
 last 7 trading days gained at least 3%, or
 both 7-day blocks in the last 14 trading days gained at least 2%, or
 all three 7-day blocks in the last 21 trading days gained at least 1%.
+or the last 7 trading days lost at least 3% when using `profit_stop`.
+```
+
+Slope exit modes:
+
+```text
+neg         -> exit when slope turns negative
+profit      -> exit into strength using the positive-slope profit rules
+profit_stop -> profit rules plus a -3% 7-day negative-slope stop
 ```
 
 The program prints a metrics table and writes daily strategy details to:

@@ -6,7 +6,36 @@
 
 #include <exception>
 #include <iostream>
+#include <stdexcept>
 #include <string>
+
+namespace {
+
+SlopeExitMode parseSlopeExitMode(const std::string& mode) {
+    if (mode == "neg") {
+        return SlopeExitMode::NegativeSlope;
+    }
+    if (mode == "profit") {
+        return SlopeExitMode::PositiveProfit;
+    }
+    if (mode == "profit_stop") {
+        return SlopeExitMode::PositiveProfitWithStop;
+    }
+
+    throw std::runtime_error("Slope exit mode must be one of: neg, profit, profit_stop.");
+}
+
+std::string slopeExitModeName(SlopeExitMode mode) {
+    if (mode == SlopeExitMode::NegativeSlope) {
+        return "neg";
+    }
+    if (mode == SlopeExitMode::PositiveProfit) {
+        return "profit";
+    }
+    return "profit_stop";
+}
+
+} // namespace
 
 int main(int argc, char* argv[]) {
     const std::string filePath = argc >= 2 ? argv[1] : "data/sample_prices.csv";
@@ -31,6 +60,9 @@ int main(int argc, char* argv[]) {
         }
         if (argc >= 7) {
             strategyConfig.slopeLookback = std::stoi(argv[6]);
+        }
+        if (argc >= 8) {
+            strategyConfig.slopeExitMode = parseSlopeExitMode(argv[7]);
         }
 
         if (strategyConfig.lookback <= 1) {
@@ -63,7 +95,8 @@ int main(int argc, char* argv[]) {
                   << ", entryZScore=" << strategyConfig.entryZScore
                   << ", exitZScore=" << strategyConfig.exitZScore
                   << ", transactionCost=" << backtestConfig.transactionCost
-                  << ", slopeLookback=" << strategyConfig.slopeLookback << "\n";
+                  << ", slopeLookback=" << strategyConfig.slopeLookback
+                  << ", slopeExitMode=" << slopeExitModeName(strategyConfig.slopeExitMode) << "\n";
         printMetricsTable(strategyMetrics, buyAndHoldMetrics);
 
         const std::string resultPath = "results/daily_results.csv";
