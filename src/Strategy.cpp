@@ -55,20 +55,6 @@ bool hasPositiveSlopeExit(const PriceSeries& prices, int index, int slopeLookbac
     return oneStrongBlock || twoGoodBlocks || threeSmallBlocks;
 }
 
-bool hasNegativeSlopeStop(const PriceSeries& prices, int index, int slopeLookback) {
-    constexpr int trendLookback = 60;
-
-    if (slopeLookback <= 0 || index < slopeLookback || index < trendLookback) {
-        return false;
-    }
-
-    const double trendMean = rollingMean(prices, index - trendLookback, index);
-    const bool shortTermDamage = periodReturn(prices, index - slopeLookback, index) <= -0.05;
-    const bool belowMediumTrend = prices[index].close < trendMean;
-
-    return shortTermDamage && belowMediumTrend;
-}
-
 bool shouldExitSlopeMode(const PriceSeries& prices, int index, int slopeLookback, SlopeExitMode mode) {
     const double slope = priceSlope(prices, index, slopeLookback);
 
@@ -76,12 +62,7 @@ bool shouldExitSlopeMode(const PriceSeries& prices, int index, int slopeLookback
         return slope < 0.0;
     }
 
-    const bool profitExit = hasPositiveSlopeExit(prices, index, slopeLookback);
-    if (mode == SlopeExitMode::PositiveProfit) {
-        return profitExit;
-    }
-
-    return profitExit || hasNegativeSlopeStop(prices, index, slopeLookback);
+    return hasPositiveSlopeExit(prices, index, slopeLookback);
 }
 
 } // namespace

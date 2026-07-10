@@ -46,7 +46,7 @@ For entry, the slope must be positive.
 For exit, the strategy sells into strength if recent positive slope is strong enough.
 
 ```bash
-./build/backtester data/RELIANCE.csv 60 -1.0 0 0.001 7 profit_stop
+./build/backtester data/RELIANCE.csv 60 -1.0 0 0.001 7 profit
 ```
 
 With `slope-lookback = 7`, slope-mode exit happens if:
@@ -55,7 +55,6 @@ With `slope-lookback = 7`, slope-mode exit happens if:
 last 7 trading days gained at least 3%, or
 both 7-day blocks in the last 14 trading days gained at least 2%, or
 all three 7-day blocks in the last 21 trading days gained at least 1%.
-or the last 7 trading days lost at least 5% and price is below its 60-day moving average when using `profit_stop`.
 ```
 
 Slope exit modes:
@@ -63,7 +62,6 @@ Slope exit modes:
 ```text
 neg         -> exit when slope turns negative
 profit      -> exit into strength using the positive-slope profit rules
-profit_stop -> profit rules plus a -5% 7-day negative-slope stop, confirmed by price below the 60-day moving average
 ```
 
 The program prints a metrics table and writes daily strategy details to:

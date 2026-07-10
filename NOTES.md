@@ -573,7 +573,7 @@ positive slope -> today's price is above price 7 trading days ago
 Run it like:
 
 ```bash
-./build/backtester data/RELIANCE.csv 60 -1.0 0 0.001 7 profit_stop
+./build/backtester data/RELIANCE.csv 60 -1.0 0 0.001 7 profit
 ```
 
 When `slopeLookback = 0`, the program uses the original z-score-only exit rule.
@@ -589,7 +589,6 @@ Exit requires:
 last 7 trading days gained at least 3%
 or both 7-day blocks in the last 14 trading days gained at least 2%
 or all three 7-day blocks in the last 21 trading days gained at least 1%
-or, in `profit_stop` mode, the last 7 trading days lost at least 5% and price is below its 60-day moving average
 ```
 
 This exits into strength instead of waiting for weakness. The idea is to take profit after a rebound has happened, even if the rebound was gradual:
@@ -605,5 +604,4 @@ The supported slope exit modes are:
 ```text
 neg         -> exit when slope turns negative
 profit      -> exit into strength using only the positive-slope profit rules
-profit_stop -> profit rules plus a -5% 7-day negative-slope stop, confirmed by price below the 60-day moving average
 ```

@@ -18,11 +18,8 @@ SlopeExitMode parseSlopeExitMode(const std::string& mode) {
     if (mode == "profit") {
         return SlopeExitMode::PositiveProfit;
     }
-    if (mode == "profit_stop") {
-        return SlopeExitMode::PositiveProfitWithStop;
-    }
 
-    throw std::runtime_error("Slope exit mode must be one of: neg, profit, profit_stop.");
+    throw std::runtime_error("Slope exit mode must be one of: neg, profit.");
 }
 
 std::string slopeExitModeName(SlopeExitMode mode) {
@@ -32,7 +29,7 @@ std::string slopeExitModeName(SlopeExitMode mode) {
     if (mode == SlopeExitMode::PositiveProfit) {
         return "profit";
     }
-    return "profit_stop";
+    return "neg";
 }
 
 } // namespace
