@@ -73,6 +73,12 @@ You can also pass custom Yahoo tickers:
 .venv/bin/python scripts/download_yahoo_data.py TCS.NS INFY.NS HDFCBANK.NS
 ```
 
+Check downloaded data for suspicious one-day moves:
+
+```bash
+.venv/bin/python scripts/check_data_quality.py
+```
+
 ## Metrics
 
 - Total return

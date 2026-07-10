@@ -488,3 +488,24 @@ The CSV reader now uses this rule:
 If Adj Close exists, use Adj Close.
 Otherwise, use Close.
 ```
+
+## Why did NIFTYBEES and BANKBEES show a -90% drawdown?
+
+The data quality check found one suspicious day in both ETF files:
+
+```text
+NIFTYBEES: 2019-12-19 had about a -89.9% daily move
+BANKBEES:  2019-12-19 had about a -90.0% daily move
+```
+
+That is probably not a real ETF crash. It is likely a data artifact from Yahoo Finance, such as a split or adjustment issue.
+
+This explains why buy-and-hold max drawdown looked close to `-90%`. A single bad price can make the benchmark look much worse and can distort the strategy result.
+
+The next step is to either:
+
+```text
+use a more reliable ETF data source,
+fix/remove clearly bad rows,
+or document that those ETF results are not trustworthy yet.
+```
