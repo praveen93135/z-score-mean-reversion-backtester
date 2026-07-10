@@ -32,13 +32,19 @@ cmake --build build
 You can also override strategy parameters:
 
 ```bash
-./build/backtester <csv-file> <lookback> <entry-z> <exit-z> <transaction-cost>
+./build/backtester <csv-file> <lookback> <entry-z> <exit-z> <transaction-cost> <slope-lookback>
 ```
 
 Example:
 
 ```bash
 ./build/backtester data/RELIANCE.csv 60 -2 0 0.001
+```
+
+Set `slope-lookback` to a positive number to use slope confirmation:
+
+```bash
+./build/backtester data/RELIANCE.csv 20 -0.5 0 0.001 3
 ```
 
 The program prints a metrics table and writes daily strategy details to:

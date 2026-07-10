@@ -540,3 +540,41 @@ Example:
 ```bash
 ./build/backtester data/RELIANCE.csv 60 -2 0 0.001
 ```
+
+## What is the slope-confirmed entry/exit idea?
+
+The original strategy enters when price is very low by z-score and exits when z-score returns above 0.
+
+A different idea is:
+
+```text
+Entry:
+zScore < -0.5
+and recent price slope has turned positive
+
+Exit:
+after entry, exit when recent price slope turns negative
+```
+
+This avoids buying only because price is low. It waits for some evidence that price has started recovering.
+
+In this project, slope is currently defined simply:
+
+```text
+slope = today's adjusted close - adjusted close N trading days ago
+```
+
+So if `slopeLookback = 3`:
+
+```text
+positive slope -> today's price is above price 3 trading days ago
+negative slope -> today's price is below price 3 trading days ago
+```
+
+Run it like:
+
+```bash
+./build/backtester data/RELIANCE.csv 20 -0.5 0 0.001 3
+```
+
+When `slopeLookback = 0`, the program uses the original z-score-only exit rule.

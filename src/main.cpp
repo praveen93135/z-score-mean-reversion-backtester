@@ -29,9 +29,15 @@ int main(int argc, char* argv[]) {
         if (argc >= 6) {
             backtestConfig.transactionCost = std::stod(argv[5]);
         }
+        if (argc >= 7) {
+            strategyConfig.slopeLookback = std::stoi(argv[6]);
+        }
 
         if (strategyConfig.lookback <= 1) {
             throw std::runtime_error("Lookback must be greater than 1.");
+        }
+        if (strategyConfig.slopeLookback < 0) {
+            throw std::runtime_error("Slope lookback cannot be negative.");
         }
 
         const StrategySignals signals = generateSignals(prices, strategyConfig);
@@ -56,7 +62,8 @@ int main(int argc, char* argv[]) {
         std::cout << "Config: lookback=" << strategyConfig.lookback
                   << ", entryZScore=" << strategyConfig.entryZScore
                   << ", exitZScore=" << strategyConfig.exitZScore
-                  << ", transactionCost=" << backtestConfig.transactionCost << "\n";
+                  << ", transactionCost=" << backtestConfig.transactionCost
+                  << ", slopeLookback=" << strategyConfig.slopeLookback << "\n";
         printMetricsTable(strategyMetrics, buyAndHoldMetrics);
 
         const std::string resultPath = "results/daily_results.csv";

@@ -23,6 +23,14 @@ double rollingStdDev(const PriceSeries& prices, int start, int endExclusive, dou
     return std::sqrt(variance);
 }
 
+double priceSlope(const PriceSeries& prices, int index, int slopeLookback) {
+    if (slopeLookback <= 0 || index < slopeLookback) {
+        return 0.0;
+    }
+
+    return prices[index].close - prices[index - slopeLookback].close;
+}
+
 } // namespace
 
 StrategySignals generateSignals(const PriceSeries& prices, const StrategyConfig& config) {
@@ -44,10 +52,20 @@ StrategySignals generateSignals(const PriceSeries& prices, const StrategyConfig&
             signals.zScores[i] = (prices[i].close - mean) / stdDev;
         }
 
-        if (!inPosition && signals.zScores[i] < config.entryZScore) {
-            inPosition = true;
-        } else if (inPosition && signals.zScores[i] > config.exitZScore) {
-            inPosition = false;
+        if (config.slopeLookback > 0) {
+            const double slope = priceSlope(prices, i, config.slopeLookback);
+
+            if (!inPosition && signals.zScores[i] < config.entryZScore && slope > 0.0) {
+                inPosition = true;
+            } else if (inPosition && slope < 0.0) {
+                inPosition = false;
+            }
+        } else {
+            if (!inPosition && signals.zScores[i] < config.entryZScore) {
+                inPosition = true;
+            } else if (inPosition && signals.zScores[i] > config.exitZScore) {
+                inPosition = false;
+            }
         }
 
         signals.positions[i] = inPosition ? 1 : 0;
