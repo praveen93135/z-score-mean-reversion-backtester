@@ -41,6 +41,10 @@ int main(int argc, char* argv[]) {
         const std::string resultPath = "results/daily_results.csv";
         writeDailyResultsCsv(resultPath, prices, signals, result);
         std::cout << "Daily results written to " << resultPath << "\n";
+
+        const std::string tradesPath = "results/trades.csv";
+        writeTradesCsv(tradesPath, result);
+        std::cout << "Trade log written to " << tradesPath << "\n";
     } catch (const std::exception& error) {
         std::cerr << "Error: " << error.what() << "\n";
         return 1;

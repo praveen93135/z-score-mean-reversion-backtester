@@ -12,3 +12,8 @@ void writeDailyResultsCsv(
     const StrategySignals& signals,
     const BacktestResult& result
 );
+
+void writeTradesCsv(
+    const std::string& filePath,
+    const BacktestResult& result
+);

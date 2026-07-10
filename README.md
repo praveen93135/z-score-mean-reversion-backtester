@@ -33,6 +33,7 @@ The program prints a metrics table and writes daily strategy details to:
 
 ```text
 results/daily_results.csv
+results/trades.csv
 ```
 
 The input CSV should contain at least these columns:

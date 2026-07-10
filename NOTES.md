@@ -383,3 +383,29 @@ Were the daily returns reasonable?
 ```
 
 So the results file is a debugging and learning tool, not just an output file.
+
+## Why export a trade log?
+
+The daily results file shows every row, but sometimes we only want to see the actual trades.
+
+The trade log shows:
+
+```text
+EntryDate
+EntryPrice
+ExitDate
+ExitPrice
+HoldingDays
+GrossReturn
+```
+
+This makes it easier to answer:
+
+```text
+How many full trades happened?
+Where did each trade enter and exit?
+How much did each trade make or lose before costs?
+Did the strategy hold too long or exit quickly?
+```
+
+The current trade prices are based on close-to-close daily data, so they are still an approximation. Later, if we add `Open`, `High`, `Low`, and `Close`, we can model execution more realistically.
