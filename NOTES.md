@@ -438,3 +438,11 @@ data/BANKBEES.csv
 ```
 
 This keeps the C++ project focused on strategy logic while still making data collection easy.
+
+On systems where global `pip install` is blocked, use a local virtual environment:
+
+```bash
+python3 -m venv .venv
+.venv/bin/python -m pip install -r requirements.txt
+.venv/bin/python scripts/download_yahoo_data.py
+```

@@ -48,13 +48,14 @@ Date,Close
 Yahoo Finance may not always show a visible CSV download button. As an alternative, install the optional Python downloader dependency:
 
 ```bash
-python3 -m pip install -r requirements.txt
+python3 -m venv .venv
+.venv/bin/python -m pip install -r requirements.txt
 ```
 
 Then download default sample tickers:
 
 ```bash
-python3 scripts/download_yahoo_data.py
+.venv/bin/python scripts/download_yahoo_data.py
 ```
 
 This writes:
@@ -68,7 +69,7 @@ data/BANKBEES.csv
 You can also pass custom Yahoo tickers:
 
 ```bash
-python3 scripts/download_yahoo_data.py TCS.NS INFY.NS HDFCBANK.NS
+.venv/bin/python scripts/download_yahoo_data.py TCS.NS INFY.NS HDFCBANK.NS
 ```
 
 ## Metrics

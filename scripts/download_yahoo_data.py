@@ -1,6 +1,7 @@
 import sys
 from pathlib import Path
 
+import pandas as pd
 import yfinance as yf
 
 
@@ -23,9 +24,14 @@ def download_ticker(ticker: str, output_dir: Path) -> None:
     if data.empty:
         raise RuntimeError(f"No data returned for {ticker}")
 
+    if isinstance(data.columns, pd.MultiIndex):
+        data.columns = data.columns.get_level_values(0)
+
+    data = data.reset_index()
+
     output_dir.mkdir(parents=True, exist_ok=True)
     output_path = output_dir / output_name(ticker)
-    data.to_csv(output_path)
+    data.to_csv(output_path, index=False)
     print(f"Wrote {output_path}")
 
 
