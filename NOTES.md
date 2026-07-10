@@ -409,3 +409,32 @@ Did the strategy hold too long or exit quickly?
 ```
 
 The current trade prices are based on close-to-close daily data, so they are still an approximation. Later, if we add `Open`, `High`, `Low`, and `Close`, we can model execution more realistically.
+
+## Where can we get real CSV data?
+
+Manual Yahoo Finance downloads may not always show a clear download button.
+
+For this project, a practical workflow is:
+
+```text
+Use Python only to download CSV data.
+Use C++ to run the actual backtest.
+```
+
+The helper script uses Yahoo Finance ticker symbols such as:
+
+```text
+RELIANCE.NS
+NIFTYBEES.NS
+BANKBEES.NS
+```
+
+and writes:
+
+```text
+data/RELIANCE.csv
+data/NIFTYBEES.csv
+data/BANKBEES.csv
+```
+
+This keeps the C++ project focused on strategy logic while still making data collection easy.
