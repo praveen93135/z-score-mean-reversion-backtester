@@ -553,7 +553,7 @@ zScore < -0.5
 and recent price slope has turned positive
 
 Exit:
-after entry, exit when recent price slope turns negative
+after entry, exit when both short and longer price slopes turn negative
 ```
 
 This avoids buying only because price is low. It waits for some evidence that price has started recovering.
@@ -564,17 +564,29 @@ In this project, slope is currently defined simply:
 slope = today's adjusted close - adjusted close N trading days ago
 ```
 
-So if `slopeLookback = 3`:
+So if `slopeLookback = 7`:
 
 ```text
-positive slope -> today's price is above price 3 trading days ago
-negative slope -> today's price is below price 3 trading days ago
+short slope = today's price - price 7 trading days ago
+long slope  = today's price - price 14 trading days ago
 ```
 
 Run it like:
 
 ```bash
-./build/backtester data/RELIANCE.csv 20 -0.5 0 0.001 3
+./build/backtester data/RELIANCE.csv 20 -1.0 0 0.001 7
 ```
 
 When `slopeLookback = 0`, the program uses the original z-score-only exit rule.
+
+In slope mode:
+
+```text
+Entry requires:
+zScore < entryZScore
+short slope > 0
+
+Exit requires:
+short slope < 0
+long slope < 0
+```

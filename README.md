@@ -41,10 +41,12 @@ Example:
 ./build/backtester data/RELIANCE.csv 60 -2 0 0.001
 ```
 
-Set `slope-lookback` to a positive number to use slope confirmation:
+Set `slope-lookback` to a positive number to use slope confirmation.
+For entry, the short slope must be positive.
+For exit, both the short slope and `2 * slope-lookback` slope must be negative.
 
 ```bash
-./build/backtester data/RELIANCE.csv 20 -0.5 0 0.001 3
+./build/backtester data/RELIANCE.csv 20 -1.0 0 0.001 7
 ```
 
 The program prints a metrics table and writes daily strategy details to:

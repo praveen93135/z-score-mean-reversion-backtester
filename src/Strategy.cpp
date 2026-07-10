@@ -53,11 +53,12 @@ StrategySignals generateSignals(const PriceSeries& prices, const StrategyConfig&
         }
 
         if (config.slopeLookback > 0) {
-            const double slope = priceSlope(prices, i, config.slopeLookback);
+            const double shortSlope = priceSlope(prices, i, config.slopeLookback);
+            const double longSlope = priceSlope(prices, i, config.slopeLookback * 2);
 
-            if (!inPosition && signals.zScores[i] < config.entryZScore && slope > 0.0) {
+            if (!inPosition && signals.zScores[i] < config.entryZScore && shortSlope > 0.0) {
                 inPosition = true;
-            } else if (inPosition && slope < 0.0) {
+            } else if (inPosition && shortSlope < 0.0 && longSlope < 0.0) {
                 inPosition = false;
             }
         } else {
