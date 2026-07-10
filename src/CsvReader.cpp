@@ -45,10 +45,12 @@ PriceSeries readPriceCsv(const std::string& filePath) {
 
     const std::vector<std::string> header = splitCsvLine(line);
     const int dateColumn = findColumn(header, "Date");
-    const int closeColumn = findColumn(header, "Close");
+    const int adjustedCloseColumn = findColumn(header, "Adj Close");
+    const int rawCloseColumn = findColumn(header, "Close");
+    const int priceColumn = adjustedCloseColumn != -1 ? adjustedCloseColumn : rawCloseColumn;
 
-    if (dateColumn == -1 || closeColumn == -1) {
-        throw std::runtime_error("CSV must contain Date and Close columns.");
+    if (dateColumn == -1 || priceColumn == -1) {
+        throw std::runtime_error("CSV must contain Date and either Adj Close or Close columns.");
     }
 
     PriceSeries prices;
@@ -58,14 +60,14 @@ PriceSeries readPriceCsv(const std::string& filePath) {
         }
 
         const std::vector<std::string> cells = splitCsvLine(line);
-        const int neededColumns = std::max(dateColumn, closeColumn) + 1;
+        const int neededColumns = std::max(dateColumn, priceColumn) + 1;
         if (static_cast<int>(cells.size()) < neededColumns) {
             continue;
         }
 
         PricePoint point;
         point.date = cells[dateColumn];
-        point.close = std::stod(cells[closeColumn]);
+        point.close = std::stod(cells[priceColumn]);
         prices.push_back(point);
     }
 

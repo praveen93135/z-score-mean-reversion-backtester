@@ -446,3 +446,45 @@ python3 -m venv .venv
 .venv/bin/python -m pip install -r requirements.txt
 .venv/bin/python scripts/download_yahoo_data.py
 ```
+
+## What is `Adj Close`?
+
+`Adj Close` means adjusted close.
+
+It is the closing price adjusted for corporate actions such as:
+
+```text
+stock splits
+bonus issues
+dividends
+rights issues
+```
+
+This matters because raw `Close` can show fake crashes or jumps.
+
+Example:
+
+```text
+Raw Close:
+Day 1: 1000
+Day 2: 100
+Looks like: -90%
+```
+
+If that happened because of a split, investors did not actually lose 90%. They now own more shares. Adjusted close changes the old prices so return calculations stay realistic:
+
+```text
+Adjusted Close:
+Day 1: 100
+Day 2: 100
+Looks like: 0%
+```
+
+For backtesting with daily historical data, `Adj Close` is often better than raw `Close` because it avoids fake returns from splits and dividends.
+
+The CSV reader now uses this rule:
+
+```text
+If Adj Close exists, use Adj Close.
+Otherwise, use Close.
+```

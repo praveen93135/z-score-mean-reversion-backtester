@@ -36,7 +36,8 @@ results/daily_results.csv
 results/trades.csv
 ```
 
-The input CSV should contain at least these columns:
+The input CSV should contain `Date` and either `Adj Close` or `Close`.
+If both are available, the backtester uses `Adj Close` because it is better for historical return calculations.
 
 ```csv
 Date,Close
