@@ -56,11 +56,17 @@ bool hasPositiveSlopeExit(const PriceSeries& prices, int index, int slopeLookbac
 }
 
 bool hasNegativeSlopeStop(const PriceSeries& prices, int index, int slopeLookback) {
-    if (slopeLookback <= 0 || index < slopeLookback) {
+    constexpr int trendLookback = 60;
+
+    if (slopeLookback <= 0 || index < slopeLookback || index < trendLookback) {
         return false;
     }
 
-    return periodReturn(prices, index - slopeLookback, index) <= -0.05;
+    const double trendMean = rollingMean(prices, index - trendLookback, index);
+    const bool shortTermDamage = periodReturn(prices, index - slopeLookback, index) <= -0.05;
+    const bool belowMediumTrend = prices[index].close < trendMean;
+
+    return shortTermDamage && belowMediumTrend;
 }
 
 bool shouldExitSlopeMode(const PriceSeries& prices, int index, int slopeLookback, SlopeExitMode mode) {
