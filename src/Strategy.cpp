@@ -31,6 +31,30 @@ double priceSlope(const PriceSeries& prices, int index, int slopeLookback) {
     return prices[index].close - prices[index - slopeLookback].close;
 }
 
+double periodReturn(const PriceSeries& prices, int startIndex, int endIndex) {
+    if (startIndex < 0 || endIndex <= startIndex || prices[startIndex].close == 0.0) {
+        return 0.0;
+    }
+
+    return (prices[endIndex].close / prices[startIndex].close) - 1.0;
+}
+
+bool hasPositiveSlopeExit(const PriceSeries& prices, int index, int slopeLookback) {
+    if (slopeLookback <= 0 || index < slopeLookback * 3) {
+        return false;
+    }
+
+    const double lastBlock = periodReturn(prices, index - slopeLookback, index);
+    const double middleBlock = periodReturn(prices, index - slopeLookback * 2, index - slopeLookback);
+    const double firstBlock = periodReturn(prices, index - slopeLookback * 3, index - slopeLookback * 2);
+
+    const bool oneStrongBlock = lastBlock >= 0.03;
+    const bool twoGoodBlocks = middleBlock >= 0.02 && lastBlock >= 0.02;
+    const bool threeSmallBlocks = firstBlock >= 0.01 && middleBlock >= 0.01 && lastBlock >= 0.01;
+
+    return oneStrongBlock || twoGoodBlocks || threeSmallBlocks;
+}
+
 } // namespace
 
 StrategySignals generateSignals(const PriceSeries& prices, const StrategyConfig& config) {
@@ -57,7 +81,7 @@ StrategySignals generateSignals(const PriceSeries& prices, const StrategyConfig&
 
             if (!inPosition && signals.zScores[i] < config.entryZScore && slope > 0.0) {
                 inPosition = true;
-            } else if (inPosition && slope < 0.0) {
+            } else if (inPosition && hasPositiveSlopeExit(prices, i, config.slopeLookback)) {
                 inPosition = false;
             }
         } else {

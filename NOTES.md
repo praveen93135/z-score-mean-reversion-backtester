@@ -553,7 +553,7 @@ zScore < -0.5
 and recent price slope has turned positive
 
 Exit:
-after entry, exit when recent price slope turns negative
+after entry, exit when recent positive slope is strong enough
 ```
 
 This avoids buying only because price is low. It waits for some evidence that price has started recovering.
@@ -568,7 +568,6 @@ So if `slopeLookback = 7`:
 
 ```text
 positive slope -> today's price is above price 7 trading days ago
-negative slope -> today's price is below price 7 trading days ago
 ```
 
 Run it like:
@@ -587,5 +586,15 @@ zScore < entryZScore
 slope > 0
 
 Exit requires:
-slope < 0
+last 7 trading days gained at least 3%
+or both 7-day blocks in the last 14 trading days gained at least 2%
+or all three 7-day blocks in the last 21 trading days gained at least 1%
+```
+
+This exits into strength instead of waiting for weakness. The idea is to take profit after a rebound has happened, even if the rebound was gradual:
+
+```text
+fast rebound: 3% in 7 trading days
+steady rebound: 2% + 2% across two 7-day blocks
+slow rebound: 1% + 1% + 1% across three 7-day blocks
 ```

@@ -43,10 +43,18 @@ Example:
 
 Set `slope-lookback` to a positive number to use slope confirmation.
 For entry, the slope must be positive.
-For exit, the same slope must be negative.
+For exit, the strategy sells into strength if recent positive slope is strong enough.
 
 ```bash
 ./build/backtester data/RELIANCE.csv 20 -1.0 0 0.001 7
+```
+
+With `slope-lookback = 7`, slope-mode exit happens if:
+
+```text
+last 7 trading days gained at least 3%, or
+both 7-day blocks in the last 14 trading days gained at least 2%, or
+all three 7-day blocks in the last 21 trading days gained at least 1%.
 ```
 
 The program prints a metrics table and writes daily strategy details to:
