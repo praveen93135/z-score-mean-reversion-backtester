@@ -148,6 +148,37 @@ Check downloaded data for suspicious one-day moves:
 .venv/bin/python scripts/check_data_quality.py
 ```
 
+## Results
+
+Results below use this branch's preferred stop strategy:
+
+```bash
+./build/backtester data/<TICKER>.csv 60 -1.0 0 0.001 7 profit_stop
+```
+
+| Ticker | Strategy Return | Buy & Hold Return | Strategy Sharpe | Buy & Hold Sharpe | Strategy Max DD | Buy & Hold Max DD | Trades |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| RELIANCE | 49.85% | 504.12% | 0.55 | 0.81 | -16.60% | -45.09% | 76 |
+| TCS | 26.80% | 112.95% | 0.35 | 0.44 | -19.06% | -53.39% | 71 |
+| INFY | 10.99% | 140.49% | 0.18 | 0.47 | -17.32% | -48.17% | 91 |
+| HDFCBANK | 20.29% | 201.57% | 0.29 | 0.61 | -16.21% | -41.05% | 74 |
+| ICICIBANK | 68.66% | 547.29% | 0.59 | 0.79 | -11.63% | -48.31% | 52 |
+| SBIN | 45.17% | 413.28% | 0.38 | 0.68 | -12.63% | -59.49% | 60 |
+| ITC | 33.44% | 68.52% | 0.41 | 0.34 | -14.71% | -55.28% | 76 |
+| LT | 17.81% | 347.96% | 0.29 | 0.72 | -14.46% | -54.44% | 68 |
+| AXISBANK | -13.16% | 147.06% | -0.13 | 0.45 | -20.57% | -63.11% | 76 |
+| KOTAKBANK | 24.13% | 149.86% | 0.32 | 0.49 | -18.46% | -36.50% | 68 |
+| HINDUNILVR | -8.13% | 171.78% | -0.09 | 0.57 | -25.35% | -30.46% | 64 |
+
+Average strategy results across these stocks:
+
+```text
+Average return:       25.08%
+Average Sharpe:        0.29
+Average max drawdown: -17.00%
+Average trades:       71
+```
+
 ## Metrics
 
 - Total return
