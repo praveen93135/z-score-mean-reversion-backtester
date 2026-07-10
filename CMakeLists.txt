@@ -12,6 +12,7 @@ add_executable(backtester
     src/Strategy.cpp
     src/Backtester.cpp
     src/Metrics.cpp
+    src/ResultWriter.cpp
 )
 
 target_include_directories(backtester PRIVATE include)

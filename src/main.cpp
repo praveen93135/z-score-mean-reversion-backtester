@@ -1,6 +1,7 @@
 #include "Backtester.hpp"
 #include "CsvReader.hpp"
 #include "Metrics.hpp"
+#include "ResultWriter.hpp"
 #include "Strategy.hpp"
 
 #include <exception>
@@ -36,6 +37,10 @@ int main(int argc, char* argv[]) {
 
         std::cout << "Loaded " << prices.size() << " rows from " << filePath << "\n";
         printMetricsTable(strategyMetrics, buyAndHoldMetrics);
+
+        const std::string resultPath = "results/daily_results.csv";
+        writeDailyResultsCsv(resultPath, prices, signals, result);
+        std::cout << "Daily results written to " << resultPath << "\n";
     } catch (const std::exception& error) {
         std::cerr << "Error: " << error.what() << "\n";
         return 1;

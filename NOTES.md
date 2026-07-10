@@ -356,3 +356,30 @@ Volatility is often quoted annually:
 ```text
 annualVolatility = dailyStdDev * sqrt(252)
 ```
+
+## Why export daily results?
+
+The terminal metrics show the final summary, but they do not show what happened on each day.
+
+The daily results CSV helps us inspect the strategy step by step:
+
+```text
+Date
+Close
+ZScore
+Position
+DailyReturn
+EquityCurve
+```
+
+This is useful because a backtest should not only produce a final return. We should also be able to verify:
+
+```text
+When did the strategy enter?
+When did it exit?
+Was the signal shifted correctly?
+How did the equity curve move?
+Were the daily returns reasonable?
+```
+
+So the results file is a debugging and learning tool, not just an output file.

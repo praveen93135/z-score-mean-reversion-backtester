@@ -29,6 +29,12 @@ cmake --build build
 ./build/backtester data/sample_prices.csv
 ```
 
+The program prints a metrics table and writes daily strategy details to:
+
+```text
+results/daily_results.csv
+```
+
 The input CSV should contain at least these columns:
 
 ```csv
