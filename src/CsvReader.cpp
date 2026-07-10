@@ -67,6 +67,9 @@ PriceSeries readPriceCsv(const std::string& filePath) {
 
         PricePoint point;
         point.date = cells[dateColumn];
+        if (cells[priceColumn].empty()) {
+            continue;
+        }
         point.close = std::stod(cells[priceColumn]);
         prices.push_back(point);
     }
