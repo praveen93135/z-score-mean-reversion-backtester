@@ -553,7 +553,7 @@ zScore < -0.5
 and recent price slope has turned positive
 
 Exit:
-after entry, exit when both short and longer price slopes turn negative
+after entry, exit when recent price slope turns negative
 ```
 
 This avoids buying only because price is low. It waits for some evidence that price has started recovering.
@@ -567,8 +567,8 @@ slope = today's adjusted close - adjusted close N trading days ago
 So if `slopeLookback = 7`:
 
 ```text
-short slope = today's price - price 7 trading days ago
-long slope  = today's price - price 14 trading days ago
+positive slope -> today's price is above price 7 trading days ago
+negative slope -> today's price is below price 7 trading days ago
 ```
 
 Run it like:
@@ -584,9 +584,8 @@ In slope mode:
 ```text
 Entry requires:
 zScore < entryZScore
-short slope > 0
+slope > 0
 
 Exit requires:
-short slope < 0
-long slope < 0
+slope < 0
 ```

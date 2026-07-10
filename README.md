@@ -42,8 +42,8 @@ Example:
 ```
 
 Set `slope-lookback` to a positive number to use slope confirmation.
-For entry, the short slope must be positive.
-For exit, both the short slope and `2 * slope-lookback` slope must be negative.
+For entry, the slope must be positive.
+For exit, the same slope must be negative.
 
 ```bash
 ./build/backtester data/RELIANCE.csv 20 -1.0 0 0.001 7
