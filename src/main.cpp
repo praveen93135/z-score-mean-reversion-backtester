@@ -14,8 +14,25 @@ int main(int argc, char* argv[]) {
     try {
         const PriceSeries prices = readPriceCsv(filePath);
 
-        const StrategyConfig strategyConfig;
-        const BacktestConfig backtestConfig;
+        StrategyConfig strategyConfig;
+        BacktestConfig backtestConfig;
+
+        if (argc >= 3) {
+            strategyConfig.lookback = std::stoi(argv[2]);
+        }
+        if (argc >= 4) {
+            strategyConfig.entryZScore = std::stod(argv[3]);
+        }
+        if (argc >= 5) {
+            strategyConfig.exitZScore = std::stod(argv[4]);
+        }
+        if (argc >= 6) {
+            backtestConfig.transactionCost = std::stod(argv[5]);
+        }
+
+        if (strategyConfig.lookback <= 1) {
+            throw std::runtime_error("Lookback must be greater than 1.");
+        }
 
         const StrategySignals signals = generateSignals(prices, strategyConfig);
         const BacktestResult result = runBacktest(prices, signals, backtestConfig);
@@ -36,6 +53,10 @@ int main(int argc, char* argv[]) {
         );
 
         std::cout << "Loaded " << prices.size() << " rows from " << filePath << "\n";
+        std::cout << "Config: lookback=" << strategyConfig.lookback
+                  << ", entryZScore=" << strategyConfig.entryZScore
+                  << ", exitZScore=" << strategyConfig.exitZScore
+                  << ", transactionCost=" << backtestConfig.transactionCost << "\n";
         printMetricsTable(strategyMetrics, buyAndHoldMetrics);
 
         const std::string resultPath = "results/daily_results.csv";

@@ -29,6 +29,18 @@ cmake --build build
 ./build/backtester data/sample_prices.csv
 ```
 
+You can also override strategy parameters:
+
+```bash
+./build/backtester <csv-file> <lookback> <entry-z> <exit-z> <transaction-cost>
+```
+
+Example:
+
+```bash
+./build/backtester data/RELIANCE.csv 60 -2 0 0.001
+```
+
 The program prints a metrics table and writes daily strategy details to:
 
 ```text

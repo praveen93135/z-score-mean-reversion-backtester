@@ -509,3 +509,34 @@ use a more reliable ETF data source,
 fix/remove clearly bad rows,
 or document that those ETF results are not trustworthy yet.
 ```
+
+## Why make parameters configurable?
+
+At first, the strategy used fixed values:
+
+```text
+lookback = 20
+entryZScore = -2
+exitZScore = 0
+transactionCost = 0.001
+```
+
+But strategy performance can change a lot when these values change.
+
+For example, testing `lookback = 60` instead of `20` asks:
+
+```text
+Does a longer memory window produce better mean-reversion signals?
+```
+
+The program now supports:
+
+```bash
+./build/backtester <csv-file> <lookback> <entry-z> <exit-z> <transaction-cost>
+```
+
+Example:
+
+```bash
+./build/backtester data/RELIANCE.csv 60 -2 0 0.001
+```
