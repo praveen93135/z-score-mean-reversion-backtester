@@ -55,11 +55,53 @@ bool hasPositiveSlopeExit(const PriceSeries& prices, int index, int slopeLookbac
     return oneStrongBlock || twoGoodBlocks || threeSmallBlocks;
 }
 
-bool shouldExitSlopeMode(const PriceSeries& prices, int index, int slopeLookback, SlopeExitMode mode) {
+bool hasSlowProfitExit(const PriceSeries& prices, int index, int slopeLookback, double entryPrice) {
+    const int slowLookback = slopeLookback * 2;
+    if (entryPrice <= 0.0 || slowLookback <= 0 || index < slowLookback) {
+        return false;
+    }
+
+    const bool tradeIsProfitable = prices[index].close > entryPrice;
+    const bool slowSlopeTurnedNegative = priceSlope(prices, index, slowLookback) < 0.0;
+    return tradeIsProfitable && slowSlopeTurnedNegative;
+}
+
+bool hasProtectiveExit(const PriceSeries& prices, int index, double entryPrice) {
+    if (entryPrice <= 0.0) {
+        return false;
+    }
+
+    const double tradeReturn = (prices[index].close / entryPrice) - 1.0;
+    return tradeReturn <= -0.25;
+}
+
+bool passesTrendFilter(const PriceSeries& prices, int index, int trendLookback) {
+    if (trendLookback <= 0) {
+        return true;
+    }
+    if (index < trendLookback) {
+        return false;
+    }
+
+    const double trendMean = rollingMean(prices, index - trendLookback, index);
+    return prices[index].close > trendMean * 0.60;
+}
+
+bool shouldExitSlopeMode(
+    const PriceSeries& prices,
+    int index,
+    int slopeLookback,
+    SlopeExitMode mode,
+    double entryPrice
+) {
     const double slope = priceSlope(prices, index, slopeLookback);
 
     if (mode == SlopeExitMode::NegativeSlope) {
         return slope < 0.0;
+    }
+    if (mode == SlopeExitMode::SlowProfitWithStop) {
+        return hasSlowProfitExit(prices, index, slopeLookback, entryPrice)
+            || hasProtectiveExit(prices, index, entryPrice);
     }
 
     return hasPositiveSlopeExit(prices, index, slopeLookback);
@@ -74,6 +116,7 @@ StrategySignals generateSignals(const PriceSeries& prices, const StrategyConfig&
     signals.positions.assign(n, 0);
 
     bool inPosition = false;
+    double entryPrice = 0.0;
 
     for (int i = config.lookback; i < n; ++i) {
         const int start = i - config.lookback;
@@ -88,20 +131,25 @@ StrategySignals generateSignals(const PriceSeries& prices, const StrategyConfig&
 
         if (config.slopeLookback > 0) {
             const double slope = priceSlope(prices, i, config.slopeLookback);
+            const bool trendAllowsEntry = passesTrendFilter(prices, i, config.trendLookback);
 
-            if (!inPosition && signals.zScores[i] < config.entryZScore && slope > 0.0) {
+            if (!inPosition && signals.zScores[i] < config.entryZScore && slope > 0.0 && trendAllowsEntry) {
                 inPosition = true;
+                entryPrice = prices[i].close;
             } else if (
                 inPosition
-                && shouldExitSlopeMode(prices, i, config.slopeLookback, config.slopeExitMode)
+                && shouldExitSlopeMode(prices, i, config.slopeLookback, config.slopeExitMode, entryPrice)
             ) {
                 inPosition = false;
+                entryPrice = 0.0;
             }
         } else {
             if (!inPosition && signals.zScores[i] < config.entryZScore) {
                 inPosition = true;
+                entryPrice = prices[i].close;
             } else if (inPosition && signals.zScores[i] > config.exitZScore) {
                 inPosition = false;
+                entryPrice = 0.0;
             }
         }
 

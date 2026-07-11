@@ -4,29 +4,30 @@ This project tests a z-score based mean-reversion strategy on Indian equities an
 
 ## Strategy
 
-The main strategy on `main` is a z-score dip-buying strategy with slope confirmation and a positive-profit exit.
+The main strategy on `main` is a z-score dip-buying strategy with slope confirmation, a slower profit exit, and a protective stop.
 
 - Compute a rolling moving average and rolling standard deviation.
 - Compute z-score = `(price - moving average) / standard deviation`.
 - Enter a long position when price is below the recent average and short-term slope has turned positive.
-- Exit into strength when the rebound is strong enough.
+- Exit after the rebound weakens, or exit defensively if the trade falls too far.
 
 Current preferred configuration:
 
 ```text
 lookback = 60
-entry z-score = -1.0
+entry z-score = -0.5
 slope lookback = 7
-slope exit mode = profit
+slope exit mode = slow_stop
+protective stop = 25% below entry
+trend filter = off
 transaction cost = 0.1%
 ```
 
-With `slope-lookback = 7`, the positive-profit exit triggers if:
+With `slope-lookback = 7`, `slow_stop` exits if:
 
 ```text
-last 7 trading days gained at least 3%, or
-both 7-day blocks in the last 14 trading days gained at least 2%, or
-all three 7-day blocks in the last 21 trading days gained at least 1%.
+the trade is profitable and the 14-day slope turns negative, or
+the trade falls 25% below the entry price.
 ```
 
 The original simple strategy is still available by setting `slope-lookback = 0`:
@@ -59,13 +60,13 @@ cmake --build build
 Run the current preferred strategy:
 
 ```bash
-./build/backtester data/RELIANCE.csv 60 -1.0 0 0.001 7 profit
+./build/backtester data/RELIANCE.csv 60 -0.5 0 0.001 7 slow_stop
 ```
 
 You can also override strategy parameters:
 
 ```bash
-./build/backtester <csv-file> <lookback> <entry-z> <exit-z> <transaction-cost> <slope-lookback> <slope-exit-mode>
+./build/backtester <csv-file> <lookback> <entry-z> <exit-z> <transaction-cost> <slope-lookback> <slope-exit-mode> [trend-lookback]
 ```
 
 Example:
@@ -79,7 +80,7 @@ That example runs the original z-score-only baseline because `slope-lookback = 0
 Set `slope-lookback` to a positive number to use slope confirmation:
 
 ```bash
-./build/backtester data/RELIANCE.csv 60 -1.0 0 0.001 7 profit
+./build/backtester data/RELIANCE.csv 60 -0.5 0 0.001 7 slow_stop
 ```
 
 Slope exit modes:
@@ -87,7 +88,10 @@ Slope exit modes:
 ```text
 neg         -> exit when slope turns negative
 profit      -> exit into strength using the positive-slope profit rules
+slow_stop   -> exit when 14-day slope turns negative in profit, or stop at -25%
 ```
+
+The optional `trend-lookback` argument enables an experimental trend filter. The current preferred strategy leaves this unset, so no SMA trend filter is applied.
 
 The program prints a metrics table and writes daily strategy details to:
 
@@ -144,72 +148,72 @@ Check downloaded data for suspicious one-day moves:
 Results below use the current preferred `main` strategy on the 50 downloaded NIFTY stock CSVs, excluding `NIFTYBEES`, `BANKBEES`, and `sample_prices`:
 
 ```bash
-./build/backtester data/<TICKER>.csv 60 -1.0 0 0.001 7 profit
+./build/backtester data/<TICKER>.csv 60 -0.5 0 0.001 7 slow_stop
 ```
 
 | Ticker | Strategy Return | Strategy Sharpe | Strategy Max DD | Trades | Buy & Hold Return | Buy & Hold Max DD |
 |---|---:|---:|---:|---:|---:|---:|
-| ADANIENT | 105.40% | 0.54 | -33.57% | 70 | 6805.16% | -71.35% |
-| ADANIPORTS | -17.97% | -0.02 | -54.39% | 80 | 773.55% | -52.92% |
-| APOLLOHOSP | 103.19% | 0.92 | -9.46% | 72 | 569.55% | -39.42% |
-| ASIANPAINT | -8.20% | -0.05 | -28.44% | 52 | 183.38% | -39.04% |
-| AXISBANK | 1.47% | 0.06 | -16.49% | 62 | 142.00% | -63.11% |
-| BAJAJ-AUTO | 7.77% | 0.15 | -16.77% | 44 | 395.41% | -42.31% |
-| BAJAJFINSV | 52.41% | 0.49 | -26.61% | 66 | 707.04% | -58.57% |
-| BAJFINANCE | 54.08% | 0.41 | -22.89% | 76 | 1114.51% | -62.44% |
-| BEL | 19.00% | 0.19 | -40.52% | 76 | 1181.24% | -67.20% |
-| BHARTIARTL | 19.33% | 0.22 | -24.49% | 50 | 528.62% | -46.78% |
-| CIPLA | -27.98% | -0.26 | -41.24% | 56 | 197.58% | -43.40% |
-| COALINDIA | -24.13% | -0.19 | -38.15% | 59 | 189.10% | -58.80% |
-| DRREDDY | 22.99% | 0.30 | -18.79% | 60 | 87.19% | -48.13% |
-| EICHERMOT | 47.33% | 0.42 | -21.30% | 76 | 304.05% | -60.66% |
-| ETERNAL | 32.42% | 0.40 | -25.80% | 48 | 132.10% | -74.02% |
-| GRASIM | 14.32% | 0.20 | -13.33% | 64 | 379.91% | -68.59% |
-| HCLTECH | 13.66% | 0.17 | -25.41% | 62 | 328.06% | -44.76% |
-| HDFCBANK | 30.62% | 0.35 | -22.42% | 62 | 198.86% | -41.05% |
-| HDFCLIFE | -30.66% | -0.19 | -54.61% | 58 | 64.48% | -46.19% |
-| HINDALCO | 23.60% | 0.24 | -29.60% | 59 | 695.61% | -68.20% |
-| HINDUNILVR | -0.88% | 0.03 | -24.64% | 54 | 171.01% | -30.46% |
-| ICICIBANK | 96.23% | 0.74 | -8.07% | 48 | 537.82% | -48.31% |
-| INDIGO | 127.76% | 0.71 | -19.25% | 96 | 447.81% | -54.65% |
-| INFY | 14.01% | 0.20 | -21.03% | 84 | 136.62% | -48.17% |
-| ITC | 1.62% | 0.07 | -37.54% | 70 | 68.70% | -55.28% |
-| JIOFIN | -33.69% | -0.77 | -44.78% | 34 | -6.09% | -48.21% |
-| JSWSTEEL | 1.96% | 0.07 | -29.72% | 58 | 805.27% | -65.74% |
-| KOTAKBANK | 50.78% | 0.50 | -20.50% | 62 | 149.56% | -36.50% |
-| LT | 30.76% | 0.39 | -11.31% | 58 | 341.17% | -54.44% |
-| M&M | 65.82% | 0.49 | -24.54% | 60 | 364.01% | -72.28% |
-| MARUTI | 35.24% | 0.34 | -23.05% | 56 | 251.96% | -58.26% |
-| MAXHEALTH | 10.12% | 0.24 | -11.24% | 16 | 891.75% | -28.33% |
-| NESTLEIND | 76.80% | 0.83 | -7.92% | 60 | 409.10% | -22.88% |
-| NTPC | -9.24% | -0.04 | -32.35% | 65 | 277.27% | -46.83% |
-| ONGC | -22.06% | -0.20 | -38.83% | 69 | 176.41% | -69.52% |
-| POWERGRID | 31.30% | 0.38 | -15.87% | 57 | 375.04% | -29.56% |
-| RELIANCE | 67.74% | 0.64 | -12.19% | 70 | 491.19% | -45.09% |
-| SBILIFE | -25.98% | -0.21 | -42.53% | 48 | 162.24% | -46.84% |
-| SBIN | 85.21% | 0.56 | -12.78% | 48 | 406.40% | -59.49% |
-| SHRIRAMFIN | 65.75% | 0.41 | -34.04% | 98 | 376.92% | -71.87% |
-| SUNPHARMA | 59.93% | 0.57 | -15.98% | 88 | 168.13% | -60.80% |
-| TATACONSUM | 29.18% | 0.34 | -15.70% | 74 | 837.32% | -44.30% |
-| TATASTEEL | -0.92% | 0.05 | -33.31% | 77 | 697.43% | -64.50% |
-| TCS | 52.87% | 0.54 | -12.06% | 65 | 110.95% | -53.39% |
-| TECHM | -0.52% | 0.05 | -34.89% | 60 | 298.82% | -46.57% |
-| TITAN | 34.47% | 0.37 | -18.37% | 66 | 1073.22% | -41.73% |
-| TMPV | 15.23% | 0.17 | -40.27% | 100 | -29.76% | -88.91% |
-| TRENT | 46.96% | 0.49 | -16.82% | 56 | 1558.72% | -73.30% |
-| ULTRACEMCO | 60.98% | 0.62 | -16.29% | 70 | 246.59% | -37.50% |
-| WIPRO | -8.15% | -0.05 | -22.33% | 65 | 78.28% | -50.02% |
+| ADANIENT | 246.75% | 0.65 | -30.68% | 74 | 6805.16% | -71.35% |
+| ADANIPORTS | 270.93% | 0.77 | -41.44% | 102 | 773.55% | -52.92% |
+| APOLLOHOSP | 173.26% | 0.65 | -27.86% | 74 | 569.55% | -39.42% |
+| ASIANPAINT | 167.88% | 0.77 | -18.32% | 78 | 183.38% | -39.04% |
+| AXISBANK | 239.85% | 0.72 | -29.63% | 82 | 142.00% | -63.11% |
+| BAJAJ-AUTO | 11.16% | 0.15 | -31.72% | 67 | 395.41% | -42.31% |
+| BAJAJFINSV | 345.22% | 0.88 | -40.61% | 89 | 707.04% | -58.57% |
+| BAJFINANCE | 248.00% | 0.67 | -29.21% | 67 | 1114.51% | -62.44% |
+| BEL | 95.25% | 0.41 | -52.59% | 68 | 1181.24% | -67.20% |
+| BHARTIARTL | 68.52% | 0.38 | -32.62% | 69 | 528.62% | -46.78% |
+| CIPLA | 184.72% | 0.68 | -22.96% | 77 | 197.58% | -43.40% |
+| COALINDIA | 92.45% | 0.44 | -28.19% | 71 | 189.10% | -58.80% |
+| DRREDDY | 58.51% | 0.36 | -29.21% | 66 | 87.19% | -48.13% |
+| EICHERMOT | 1.75% | 0.11 | -58.73% | 72 | 304.05% | -60.66% |
+| ETERNAL | -57.43% | -0.46 | -65.39% | 38 | 132.10% | -74.02% |
+| GRASIM | 80.29% | 0.42 | -44.25% | 48 | 379.91% | -68.59% |
+| HCLTECH | 17.67% | 0.18 | -39.14% | 41 | 328.06% | -44.76% |
+| HDFCBANK | 8.70% | 0.13 | -38.99% | 63 | 198.86% | -41.05% |
+| HDFCLIFE | 4.58% | 0.12 | -42.83% | 79 | 64.48% | -46.19% |
+| HINDALCO | 65.79% | 0.36 | -31.78% | 63 | 695.61% | -68.20% |
+| HINDUNILVR | 68.69% | 0.43 | -24.01% | 53 | 171.01% | -30.46% |
+| ICICIBANK | 192.83% | 0.71 | -23.44% | 59 | 537.82% | -48.31% |
+| INDIGO | 187.92% | 0.60 | -46.36% | 107 | 447.81% | -54.65% |
+| INFY | 37.79% | 0.28 | -35.31% | 77 | 136.62% | -48.17% |
+| ITC | -13.00% | -0.01 | -46.68% | 67 | 68.70% | -55.28% |
+| JIOFIN | -28.29% | -0.39 | -44.65% | 19 | -6.09% | -48.21% |
+| JSWSTEEL | 252.03% | 0.81 | -43.91% | 90 | 805.27% | -65.74% |
+| KOTAKBANK | 171.26% | 0.70 | -24.58% | 68 | 149.56% | -36.50% |
+| LT | 155.40% | 0.67 | -34.67% | 84 | 341.17% | -54.44% |
+| M&M | 80.46% | 0.41 | -37.74% | 79 | 364.01% | -72.28% |
+| MARUTI | 64.55% | 0.37 | -40.59% | 75 | 251.96% | -58.26% |
+| MAXHEALTH | 24.33% | 0.30 | -28.34% | 27 | 891.75% | -28.33% |
+| NESTLEIND | 132.16% | 0.76 | -12.86% | 64 | 409.10% | -22.88% |
+| NTPC | 99.71% | 0.53 | -31.37% | 83 | 277.27% | -46.83% |
+| ONGC | 74.12% | 0.37 | -43.20% | 55 | 176.41% | -69.52% |
+| POWERGRID | 83.64% | 0.47 | -27.54% | 65 | 375.04% | -29.56% |
+| RELIANCE | 145.32% | 0.59 | -32.83% | 69 | 491.19% | -45.09% |
+| SBILIFE | 102.52% | 0.55 | -30.96% | 43 | 162.24% | -46.84% |
+| SBIN | 94.04% | 0.43 | -50.73% | 72 | 406.40% | -59.49% |
+| SHRIRAMFIN | 149.33% | 0.48 | -49.40% | 101 | 376.92% | -71.87% |
+| SUNPHARMA | 55.38% | 0.34 | -40.16% | 90 | 168.13% | -60.80% |
+| TATACONSUM | 210.28% | 0.74 | -26.75% | 74 | 837.32% | -44.30% |
+| TATASTEEL | 53.90% | 0.31 | -48.88% | 53 | 697.43% | -64.50% |
+| TCS | 94.92% | 0.55 | -18.98% | 87 | 110.95% | -53.39% |
+| TECHM | 66.00% | 0.40 | -31.48% | 88 | 298.82% | -46.57% |
+| TITAN | 269.54% | 0.86 | -24.95% | 67 | 1073.22% | -41.73% |
+| TMPV | -63.58% | -0.24 | -79.21% | 80 | -29.76% | -88.91% |
+| TRENT | 93.98% | 0.42 | -51.25% | 56 | 1558.72% | -73.30% |
+| ULTRACEMCO | 258.60% | 0.96 | -20.30% | 89 | 246.59% | -37.50% |
+| WIPRO | 14.93% | 0.17 | -38.32% | 53 | 78.28% | -50.02% |
 
 Average results:
 
 | Metric | Average |
 |---|---:|
 | Stocks tested | 50 |
-| Strategy return | 27.96% |
-| Strategy annualized return | 1.99% |
-| Strategy Sharpe | 0.26 |
-| Strategy max drawdown | -25.25% |
-| Trades | 64 |
+| Strategy return | 109.05% |
+| Strategy annualized return | 6.41% |
+| Strategy Sharpe | 0.44 |
+| Strategy max drawdown | -36.51% |
+| Trades | 69.64 |
 | Buy-and-hold return | 537.03% |
 | Buy-and-hold max drawdown | -53.01% |
 

@@ -6,7 +6,8 @@
 
 enum class SlopeExitMode {
     NegativeSlope,
-    PositiveProfit
+    PositiveProfit,
+    SlowProfitWithStop
 };
 
 struct StrategyConfig {
@@ -15,6 +16,7 @@ struct StrategyConfig {
     double exitZScore = 0.0;
     int slopeLookback = 0;
     SlopeExitMode slopeExitMode = SlopeExitMode::PositiveProfit;
+    int trendLookback = 0;
 };
 
 struct StrategySignals {

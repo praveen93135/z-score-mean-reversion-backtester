@@ -18,8 +18,11 @@ SlopeExitMode parseSlopeExitMode(const std::string& mode) {
     if (mode == "profit") {
         return SlopeExitMode::PositiveProfit;
     }
+    if (mode == "slow_stop") {
+        return SlopeExitMode::SlowProfitWithStop;
+    }
 
-    throw std::runtime_error("Slope exit mode must be one of: neg, profit.");
+    throw std::runtime_error("Slope exit mode must be one of: neg, profit, slow_stop.");
 }
 
 std::string slopeExitModeName(SlopeExitMode mode) {
@@ -28,6 +31,9 @@ std::string slopeExitModeName(SlopeExitMode mode) {
     }
     if (mode == SlopeExitMode::PositiveProfit) {
         return "profit";
+    }
+    if (mode == SlopeExitMode::SlowProfitWithStop) {
+        return "slow_stop";
     }
     return "neg";
 }
@@ -61,12 +67,18 @@ int main(int argc, char* argv[]) {
         if (argc >= 8) {
             strategyConfig.slopeExitMode = parseSlopeExitMode(argv[7]);
         }
+        if (argc >= 9) {
+            strategyConfig.trendLookback = std::stoi(argv[8]);
+        }
 
         if (strategyConfig.lookback <= 1) {
             throw std::runtime_error("Lookback must be greater than 1.");
         }
         if (strategyConfig.slopeLookback < 0) {
             throw std::runtime_error("Slope lookback cannot be negative.");
+        }
+        if (strategyConfig.trendLookback < 0) {
+            throw std::runtime_error("Trend lookback cannot be negative.");
         }
 
         const StrategySignals signals = generateSignals(prices, strategyConfig);
@@ -93,7 +105,8 @@ int main(int argc, char* argv[]) {
                   << ", exitZScore=" << strategyConfig.exitZScore
                   << ", transactionCost=" << backtestConfig.transactionCost
                   << ", slopeLookback=" << strategyConfig.slopeLookback
-                  << ", slopeExitMode=" << slopeExitModeName(strategyConfig.slopeExitMode) << "\n";
+                  << ", slopeExitMode=" << slopeExitModeName(strategyConfig.slopeExitMode)
+                  << ", trendLookback=" << strategyConfig.trendLookback << "\n";
         printMetricsTable(strategyMetrics, buyAndHoldMetrics);
 
         const std::string resultPath = "results/daily_results.csv";
